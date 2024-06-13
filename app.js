@@ -3,8 +3,10 @@
 // pour initialiser le projet et installer express : 
 // npm init y
 // npm install express -- rappel : express = librairie qui se met par dessus Node pour créer des applications back + offre un package de solution qui permet d'écrire moins de code.
+// npm i argon2 pour installer Argon2 (hachage de password)
 
-const express = require("express") // permet d'importer express
+const express = require("express") // permet d'importer la lib express
+const argon2 = require("argon2") // permet d'importer la lib argon2
 const app = express() // crée une instance de l'application Express.
 const port = 3000 // permet de définir notre port
 
@@ -12,8 +14,8 @@ app.use(express.json()) // .use = méthode de la librairie express, permet de pa
 
 
 let users = [ // on crée un tableau d'utilisateur avec 2 exemples
-    { id: 1, name: 'Louis', email: 'louis@example.com' },
-    { id: 2, name: 'Lucas', email: 'lucas@example.com' }
+    { id: 1, name: 'Louis', email: 'louis@example.com', password: "123" },
+    { id: 2, name: 'Lucas', email: 'lucas@example.com', password: "456" }
     ]
 
 // ANCHOR ROUTES
@@ -26,14 +28,22 @@ app.get("/users", (req, res) => {
 
 // Route pour créer un utilisateur 
 
-app.post("/users", (req, res) => { // création d'une route pour les requêtes HTTP POST avec un URL /users
+app.post("/users", async (req, res) => { // création d'une route pour les requêtes HTTP POST avec un URL /users. On a rajouté async devant (req...) car l'utilisation d'argon2 pour le hashage doit gérer des opérations asynchrone
+
+    try {
+        const hashedPassword = await argon2.hash(req.body.password); // hachage du mdp
+
     const newUser = {
         id: users.length + 1, // Assigne un nouvel ID à l'utilisateur basé sur la longueur actuelle du tableau users
         name: req.body.name, // Récupère le nom de l'utilisateur depuis le corps de la requête.
-        email: req.body.email // Récupère l'email de l'utilisateur depuis le corps de la requête
+        email: req.body.email, // Récupère l'email de l'utilisateur depuis le corps de la requête
+        password: hashedPassword
     }
     users.push(newUser); // Ajoute le nouvel utilisateur au tableau users. Avec une BDD on aurait une auto incrémentation à chaque ajout d'utilisateur
     res.status(201).json(newUser) // Définit le code de statut HTTP à 201 (Created) et envoie la réponse avec le nouvel utilisateur en format JSON
+    } catch (err) {
+    res.status(500).send('Erreur lors du hachage du mot de passe'); // Envoie une réponse d'erreur en cas de problème avec le hachage
+    }
 })
 
 // Route pour modifie un utilisateur 
