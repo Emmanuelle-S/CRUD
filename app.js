@@ -26,9 +26,9 @@ app.get("/users", (req, res) => {
 
 // Route pour créer un utilisateur 
 
-app.post("/user", (req, res) => {
+app.post("/users", (req, res) => { // création d'une route pour les requêtes HTTP POST avec un URL /users
     const newUser = {
-        id: users.lenght + 1,
+        id: users.length + 1,
         name: req.body.name,
         email: req.body.email
     }
@@ -38,8 +38,8 @@ app.post("/user", (req, res) => {
 
 // Route pour modifie un utilisateur 
 
-app.put(".user/:id", (req, res) => {
-    const userId = parseInt(req.param.id);
+app.put("/users/:id", (req, res) => {
+    const userId = parseInt(req.params.id);
     const user = users.find(u => u.id === userId);
     if (user) {
         user.name = req.body.name || user.name;
@@ -52,7 +52,7 @@ app.put(".user/:id", (req, res) => {
 
 // Route pour supprimer un utilisateur 
 
-app.delete("/user/:id", (req, res) => {
+app.delete("/users/:id", (req, res) => {
     const userId = parseInt(req.params.id);
     const userIndex = users.findIndex(u => u.id === userId);
     if (userIndex !== -1) {
